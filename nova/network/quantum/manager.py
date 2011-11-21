@@ -616,7 +616,7 @@ class QuantumManager(manager.FloatingIP, manager.FlatManager):
         subnets = self.ipam.get_subnets_by_net_id(context,
                         ipam_tenant_id, network_ref['uuid'], vif_ref['uuid'])
         for subnet in subnets:
-            if subnet is None:
+            if subnet is None or subnet['cidr'] is None:            
                 continue
             # Fill in some of the network fields that we would have
             # previously gotten from the network table (they'll be
