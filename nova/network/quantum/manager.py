@@ -82,8 +82,8 @@ class QuantumManager(manager.FlatManager):
         self.driver.init_host()
         # TODO(bgh): We'll need to enable these when we implement the full L3
         # functionalities
-        # self.driver.ensure_metadata_ip()
-        # self.driver.metadata_forward()
+        self.driver.ensure_metadata_ip()
+        self.driver.metadata_forward()
 
     def create_networks(self, context, label, cidr, multi_host, num_networks,
                         network_size, cidr_v6, gateway, gateway_v6, bridge,
