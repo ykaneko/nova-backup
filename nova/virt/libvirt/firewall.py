@@ -18,6 +18,7 @@
 #    under the License.
 
 
+import inspect
 from eventlet import tpool
 
 from nova import context
@@ -816,3 +817,12 @@ class IptablesFirewallDriver(FirewallDriver):
 
     def _instance_chain_name(self, instance):
         return 'inst-%s' % (instance['id'],)
+
+
+class NopFirewallDriver(FirewallDriver):
+    def __init__(self, *args, **kwargs):
+        super(NopFirewallDriver, self).__init__()
+        for k, _v in inspect.getmembers(self, inspect.ismethod):
+            if k.startswith('__') or k.endswith('__'):
+                continue
+            setattr(self, k, (lambda _self, *_args, **_kwargs: True))

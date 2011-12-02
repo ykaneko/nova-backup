@@ -1049,5 +1049,16 @@ class LinuxOVSInterfaceDriver(LinuxNetInterfaceDriver):
         dev = "gw-" + str(network['uuid'][0:11])
         return dev
 
+
+class LinuxOVSOFInterfaceDriver(LinuxOVSInterfaceDriver):
+    def __init__(self):
+        super(LinuxOVSOFInterfaceDriver, self).__init__()
+        if binary_name == 'nova-network':
+            for tables in [iptables_manager.ipv4, iptables_manager.ipv6]:
+                tables['filter'].add_rule('FORWARD',
+                        '--in-interface gw-+ --out-interface gw-+ -j DROP')
+            iptables_manager.apply()
+
+
 iptables_manager = IptablesManager()
 interface_driver = utils.import_object(FLAGS.linuxnet_interface_driver)
