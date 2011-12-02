@@ -161,9 +161,12 @@ class QuantumNovaIPAMLib(object):
            the specified virtual interface, based on the fixed_ips table.
         """
         vif_rec = db.virtual_interface_get_by_uuid(context, vif_id)
-        fixed_ips = db.fixed_ip_get_by_virtual_interface(context,
-                                                         vif_rec['id'])
-        return [fixed_ip['address'] for fixed_ip in fixed_ips]
+        try:
+            fixed_ips = db.fixed_ip_get_by_virtual_interface(context,
+                                                             vif_rec['id'])
+            return [fixed_ip['address'] for fixed_ip in fixed_ips]
+        except exception.FixedIpNotFoundForVirtualInterface:
+            return []
 
     def get_v6_ips_by_interface(self, context, net_id, vif_id, project_id):
         """Returns a list containing a single IPv6 address strings
@@ -194,8 +197,12 @@ class QuantumNovaIPAMLib(object):
         """
         try:
             admin_context = context.elevated()
-            fixed_ips = db.fixed_ip_get_by_virtual_interface(admin_context,
-                                                             vif_ref['id'])
+            try:
+                fixed_ips = db.fixed_ip_get_by_virtual_interface(admin_context,
+                                                                 vif_ref['id'])
+            except exception.FixedIpNotFoundForVirtualInterface:
+                fixed_ips = []
+
             for fixed_ip in fixed_ips:
                 db.fixed_ip_update(admin_context, fixed_ip['address'],
                                    {'allocated': False,
