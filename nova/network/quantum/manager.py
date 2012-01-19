@@ -26,6 +26,7 @@ from nova import exception
 from nova import flags
 from nova import log as logging
 from nova.network import manager
+from nova.network.quantum import client as quantum_client
 from nova.network.quantum import melange_ipam_lib
 from nova.network.quantum import quantum_connection
 from nova.openstack.common import cfg
@@ -236,7 +237,11 @@ class QuantumManager(manager.FloatingIP, manager.FlatManager):
         # Check for any attached ports on the network and fail the deletion if
         # there is anything but the gateway port attached.  If it is only the
         # gateway port, unattach and delete it.
-        ports = self.q_conn.get_attached_ports(q_tenant_id, quantum_net_id)
+        try:
+            ports = self.q_conn.get_attached_ports(q_tenant_id, quantum_net_id)
+        except (quantum_client.QuantumServerException,
+                quantum_client.QuantumNotFoundException):
+            ports = []
         if len(ports) > 1:
             raise Exception(_("Network %s in use, cannot delete" %
                               (quantum_net_id)))
@@ -247,7 +252,11 @@ class QuantumManager(manager.FloatingIP, manager.FlatManager):
                                                    quantum_net_id,
                                                    p['port-id'])
         # Now we can delete the network
-        self.q_conn.delete_network(q_tenant_id, quantum_net_id)
+        try:
+            self.q_conn.delete_network(q_tenant_id, quantum_net_id)
+        except (quantum_client.QuantumServerException,
+                quantum_client.QuantumNotFoundException):
+            pass
         LOG.debug("Deleting network for tenant: %s" % project_id)
         self.ipam.delete_subnets_by_net_id(context, quantum_net_id,
                 project_id)
