@@ -455,11 +455,11 @@ class QuantumManager(manager.FloatingIP, manager.FlatManager):
                     quantum_net_id, interface_id)
 
             if not port:  # No dhcp server has been started
-                self.l3driver.initialize_gateway(network_ref)
                 LOG.debug("Intializing DHCP for network: %s" %
                     network_ref)
                 self.q_conn.create_and_attach_port(q_tenant_id,
                         quantum_net_id, interface_id)
+                self.l3driver.initialize_gateway(network_ref)
 
             hosts = self.get_dhcp_hosts_text(context,
                 subnet['network_id'], project_id)
