@@ -175,8 +175,7 @@ def legacy_network_info(network_model):
                               for ip in subnet['ips']],
                          should_create_bridge=should_create_bridge,
                          should_create_vlan=should_create_vlan,
-                         dhcp_server=dhcp_server,
-                         tenant_id=get_meta(network, 'tenant_id', ''))
+                         dhcp_server=dhcp_server)
         if routes:
             info_dict['routes'] = routes
 
